@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <Button
+        android:id="@+id/btn_start_gps_tracking"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Start GPS Tracking"
+        android:layout_alignParentLeft="true"
+         />
+
+    <Button
+        android:id="@+id/btn_stop_gps_tracking"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Stop GPS Tracking"
+        android:layout_below="@id/btn_start_gps_tracking"
+        />
+
+    <Button
+        android:id="@+id/btn_show_tracking"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Show Track"
+        android:layout_below="@id/btn_stop_gps_tracking"
+        />
+</RelativeLayout>
