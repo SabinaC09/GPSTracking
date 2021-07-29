@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Build;
@@ -23,13 +24,16 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
     public static final int DEFAULT_UPDATE_INTERVAL = 30;
     public static final int FAST_UPDATE_INTERVAL = 5;
     private static final int PERMISSIONS_FINE_LOCATION = 33;
-    ArrayList<Location> locations = new ArrayList<>();
+
+    Location currentLocation;
+    List<Location> savedLocations = new ArrayList<>();
 
 
     //Google's API for location services. The majority of the app functions using this class.
@@ -56,6 +60,9 @@ public class MainActivity extends AppCompatActivity {
         locationRequest.setFastestInterval(1000 * FAST_UPDATE_INTERVAL);
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY); // Using GPS sensors
 
+        MyApplication myApplication = (MyApplication) getApplicationContext();
+        savedLocations = myApplication.getMyLocations();
+
         locationCallback = new LocationCallback() {
 
             @Override
@@ -63,7 +70,7 @@ public class MainActivity extends AppCompatActivity {
                 super.onLocationResult(locationResult);
 
                 //save location
-                locations.add(locationResult.getLastLocation());
+                savedLocations.add(locationResult.getLastLocation());
 
             }
         };
@@ -81,6 +88,15 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 stopLocationUpdates();
+            }
+        });
+
+        Button showTrackButton = (Button) findViewById(R.id.btn_show_tracking);
+        showTrackButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent i = new Intent(MainActivity.this, MapsActivity.class);
+                startActivity(i);
             }
         });
     }
@@ -137,7 +153,8 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onSuccess(Location location) {
                     //we got permissions.
-
+                    currentLocation = location;
+                    savedLocations.add(currentLocation);
 
                 }
             });
