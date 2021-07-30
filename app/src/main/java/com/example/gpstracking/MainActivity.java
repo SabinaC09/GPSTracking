@@ -28,18 +28,20 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
-    public static final int DEFAULT_UPDATE_INTERVAL = 30;
-    public static final int FAST_UPDATE_INTERVAL = 5;
+    public static final int DEFAULT_UPDATE_INTERVAL = 300;
+    public static final int FAST_UPDATE_INTERVAL = 180;
     private static final int PERMISSIONS_FINE_LOCATION = 33;
 
     Location currentLocation;
     List<Location> savedLocations = new ArrayList<>();
 
+    Button startTrackingButton, stopTrackingButton, showTrackButton;
+
 
     //Google's API for location services. The majority of the app functions using this class.
     FusedLocationProviderClient fusedLocationProviderClient;
 
-    //variable to remember if we are traacking location or not
+    //variable to remember if we are tracking location or not
     boolean updateOn = false;
 
     //Location request is a config file dor all setting related to FusedLocationProviderClient
@@ -52,7 +54,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        fusedLocationProviderClient=LocationServices.getFusedLocationProviderClient(this);
+        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
 
         //set all properties of LocationRequest
         locationRequest = new LocationRequest();
@@ -75,23 +77,27 @@ public class MainActivity extends AppCompatActivity {
             }
         };
 
-        Button startTrackingButton = (Button) findViewById(R.id.btn_start_gps_tracking);
+        startTrackingButton = (Button) findViewById(R.id.btn_start_gps_tracking);
         startTrackingButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                updateGPS();
                 startLocationUpdates();
             }
         });
 
-        Button stopTrackingButton = (Button) findViewById(R.id.btn_stop_gps_tracking);
+        stopTrackingButton = (Button) findViewById(R.id.btn_stop_gps_tracking);
+        stopTrackingButton.setEnabled(false);
         stopTrackingButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 stopLocationUpdates();
+                stopTrackingButton.setEnabled(false);
             }
         });
 
-        Button showTrackButton = (Button) findViewById(R.id.btn_show_tracking);
+
+        showTrackButton = (Button) findViewById(R.id.btn_show_tracking);
         showTrackButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -102,21 +108,18 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void stopLocationUpdates() {
+        Toast.makeText(this, "Stop tracking", Toast.LENGTH_SHORT).show();
         fusedLocationProviderClient.removeLocationUpdates(locationCallback);
     }
 
     private void startLocationUpdates() {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return;
+
+        Toast.makeText(this, "Start tracking", Toast.LENGTH_SHORT).show();
+
+        if(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            fusedLocationProviderClient.requestLocationUpdates(locationRequest, locationCallback, null);
         }
-        fusedLocationProviderClient.requestLocationUpdates(locationRequest, locationCallback, null);
+
     }
 
     @Override
@@ -133,6 +136,7 @@ public class MainActivity extends AppCompatActivity {
             case PERMISSIONS_FINE_LOCATION:
                 if(grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     updateGPS();
+
                 }
                 else {
                     Toast.makeText(this, "This app requires permission to work properly", Toast.LENGTH_SHORT).show();
@@ -144,7 +148,6 @@ public class MainActivity extends AppCompatActivity {
     private void updateGPS() {
         //get permissions from the user to track GPS
         //get the current location from fused client
-        //update the UI - set all properties in their associated text view items.
 
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(MainActivity.this);
         if(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
@@ -155,7 +158,7 @@ public class MainActivity extends AppCompatActivity {
                     //we got permissions.
                     currentLocation = location;
                     savedLocations.add(currentLocation);
-
+                    stopTrackingButton.setEnabled(true);
                 }
             });
         } else {
